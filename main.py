@@ -87,7 +87,7 @@ def reddit_top_links_rss(subreddit):
                 link = link['url'],
                 author = link['author'],
                 description = link_description(link),
-                guid = Guid(comments_url),
+                guid = Guid(link['url']),
                 pubDate = datetime.datetime.fromtimestamp(link['created'])
             )
         )
