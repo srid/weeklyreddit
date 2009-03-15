@@ -3,13 +3,14 @@ import import_wrapper
 import os
 import datetime
 import urllib
+import logging
 try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
 
 
-from google.appengine.ext import webapp
+from google.appengine.ext import webapp, db
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
 from google.appengine.api        import users
@@ -39,6 +40,42 @@ class SimpleRequestHandler(webapp.RequestHandler):
         })
         
         self.response.out.write(template.render(path, self.view))
+        
+
+class CurrentWeekEntry(db.Model):
+    """Stores current week top links in JSON format.
+    
+    During next week, simply update the db.
+    
+    This model makes sure that we update RSS only once per week.
+    """
+    
+    subreddit = db.StringProperty(required=True)
+    top_links_json = db.TextProperty()
+    datetime = db.DateTimeProperty(required=True)
+    
+    @staticmethod
+    def reddit_top_links_for_this_week(subreddit):
+        """Cached version of reddit_top_links() -- that runs once a week"""
+        now = datetime.datetime.now()
+        
+        q = CurrentWeekEntry.all().filter("subreddit = ", subreddit or "reddit.com")
+        if q.count() == 0:
+            entry = CurrentWeekEntry(subreddit=subreddit, datetime=now)
+        else:
+            entry = q[0]
+
+        a_week = datetime.timedelta(days=7)
+        if entry.datetime + a_week > now:
+            logging.info("Updating top links for '%s'" % subreddit)
+            j = reddit_top_links(subreddit)
+            entry.top_links_json = json.dumps(j)
+            entry.datetime = now
+            entry.put()
+        else:
+            logging.info("Reusing top links for '%s'" % subreddit)
+            j = json.loads(entry.top_links_json)
+        return j
         
 
 def file_write_to_string(file_writer):
@@ -75,7 +112,7 @@ def link_description(link_data):
 def reddit_top_links_rss(subreddit):
     rss_items = []
     
-    for link in reddit_top_links(subreddit):
+    for link in CurrentWeekEntry.reddit_top_links_for_this_week(subreddit):
         link = link['data']
         comments_url = 'http://reddit.com/r/%s/comments/%s' % (link['subreddit'],
                                                                link['id'])
