@@ -59,14 +59,16 @@ class CurrentWeekEntry(db.Model):
         """Cached version of reddit_top_links() -- that runs once a week"""
         now = datetime.datetime.now()
         
-        q = CurrentWeekEntry.all().filter("subreddit = ", subreddit or "reddit.com")
+        q = CurrentWeekEntry.all().filter("subreddit = ", subreddit)
         if q.count() == 0:
             entry = CurrentWeekEntry(subreddit=subreddit, datetime=now)
+            force_update = True
         else:
             entry = q[0]
+            force_update = False
 
         a_week = datetime.timedelta(days=7)
-        if entry.datetime + a_week > now:
+        if force_update or entry.datetime + a_week < now:
             logging.info("Updating top links for '%s'" % subreddit)
             j = reddit_top_links(subreddit)
             entry.top_links_json = json.dumps(j)
@@ -99,7 +101,7 @@ def reddit_top_links(subreddit):
     
     # reddit provides a JSON api
     # see: http://code.reddit.com/ticket/154
-    top_url = "http://www.reddit.com/r/%s/top/.json?t=week" % (subreddit or "reddit.com")
+    top_url = "http://www.reddit.com/r/%s/top/.json?t=week" % subreddit
     
     j = json.load(urllib.urlopen(top_url))
     return j['data']['children']
@@ -150,7 +152,7 @@ class RSSPage(SimpleRequestHandler):
     def get(self, parent_re_group, subreddit):
         self.response.headers['Content-Type'] = 'application/rss+xml'
         self.response.out.write(
-            reddit_top_links_rss(subreddit)
+            reddit_top_links_rss(subreddit or 'reddit.com')
         )
         
 
