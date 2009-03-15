@@ -62,7 +62,7 @@ def reddit_top_links(subreddit):
     
     # reddit provides a JSON api
     # see: http://code.reddit.com/ticket/154
-    top_url = "http://www.reddit.com/r/%s/top/.json?t=week" % subreddit or "reddit.com"
+    top_url = "http://www.reddit.com/r/%s/top/.json?t=week" % (subreddit or "reddit.com")
     
     j = json.load(urllib.urlopen(top_url))
     return j['data']['children']
