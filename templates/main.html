@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+	<div class="span-24">
+            <div class="box">
+                <p>Let's face it. <b>Reading reddit <i>every day</i> kills
+                productivity.</b> But still, reddit occasionally has some
+                interesting and/or worthy links. I often enjoy reading the
+                links, along with comments, posted in the programming subreddit.
+                </p>
+                
+                <p>This site helps you to establish a habit to <b>read reddit only
+                once a week</b>.
+                </p>
+                
+                <p>How? Simply add the following feed to your feed reader
+                <b>and</b> never go to the reddit site except through the weekly
+                feed updates.
+                </p>
+                
+                <p style="text-align: center">
+                    <a href="/rss/programming"><b>programming</b>.reddit</a>
+                    [rss - weekly]
+                </p>
+                
+                <p>To subscribe to other sub reddits simply change
+                <code>/rss/programming</code> to
+                <code>/rss/yoursubreddit</code>. To subscribe to the main
+                reddit, use <a href="/rss">this link</a>.
+                </p>
+                
+                <p class="small">This site was developed by <a
+                href="http://srid.nearfar.org/">Sridhar Ratnakumar</a> using
+                Python and <a href="http://www.activestate.com/komodo/">Komodo
+                IDE</a> and deployed to Google App Engine. Source code for this
+                site is available at <a
+                href="http://github.com/srid/weeklyreddit">github</a>.
+                </p>
+            </div>
+
+
+        </div>
+	
+{% endblock %}

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Komodo Project File - DO NOT EDIT -->
+<project id="359c9737-46f2-413e-b34c-066d4e399b0e" kpf_version="4" name="weeklyreddit.kpf">
+<command cwd="%p" doNotOpenOutputWindow="0" env="" icon="chrome://komodo/content/icons/internet.png" id="516899db-9221-4728-9450-77d28b17f20f" idref="359c9737-46f2-413e-b34c-066d4e399b0e" insertOutput="0" keyboard_shortcut="" name="Upload to appengine" operateOnSelection="0" parseOutput="0" parseRegex="" runIn="command-output-window" showParsedOutputList="0">
+appcfg.py update .</command>
+<command cwd="%p" doNotOpenOutputWindow="0" env="" icon="chrome://komodo/content/icons/effects.png" id="541283c5-bb40-456f-8f7c-98f13dcc3c7f" idref="359c9737-46f2-413e-b34c-066d4e399b0e" insertOutput="0" keyboard_shortcut="" name="Run Dev Server" operateOnSelection="0" parseOutput="0" parseRegex="" runIn="command-output-window" showParsedOutputList="0">
+"C:\Program Files\Google\google_appengine\dev_appserver.py" .</command>
+<file id="7abfd3b2-2963-488b-80fe-d78670f9028d" idref="359c9737-46f2-413e-b34c-066d4e399b0e" name="main.py" url="main.py">
+</file>
+<preference-set idref="359c9737-46f2-413e-b34c-066d4e399b0e">
+  <boolean id="import_live">1</boolean>
+</preference-set>
+</project>
