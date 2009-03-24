@@ -158,7 +158,7 @@ class RSSPage(SimpleRequestHandler):
 
 application = webapp.WSGIApplication([
     ('/', MainPage),
-    ('/rss(/([a-z]+))?', RSSPage)
+    ('/rss(/([a-z_]+))?', RSSPage)
     ],
     debug=True
 )
