@@ -1,36 +1,36 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html lang="en">
-<head>
+  <head>
     <link rel="stylesheet" href="/static/blueprint/screen.css" type="text/css" media="screen, projection">
 	<link rel="stylesheet" href="/static/blueprint/print.css" type="text/css" media="print">
-        <!--[if IE]><link rel="stylesheet" href="/static/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+    <!--[if IE]><link rel="stylesheet" href="/static/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
 	
 	<link rel="stylesheet" href="/static/custom.css" type="text/css">
-		
+	
 	<title>read top links in reddit every week</title>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="span-24">
-            &nbsp;
-			{% if messages %}
-			{% for m in messages %}
-			<p style="text-align: center;"><span class="highlight">
-				{{ m }}
-			</span></p>
-			{% endfor %}
-			{% endif %}
+      <div class="span-24">
+        &nbsp;
+		{% if messages %}
+		{% for m in messages %}
+		<p style="text-align: center;"><span class="highlight">
+			{{ m }}
+		</span></p>
+		{% endfor %}
+		{% endif %}
 		
-        </div>
-	
-        <div class="span-24">
-            {% block content %}
-            {% endblock %}
-        </div>
-	
-	<div class="span-24 small footer">
+      </div>
+	  
+      <div class="span-24">
+        {% block content %}
+        {% endblock %}
+      </div>
+	  
+	  <div class="span-24 small footer">
 	    
-        </div>	
+      </div>	
     </div>
-</body>
+  </body>
 </html>
