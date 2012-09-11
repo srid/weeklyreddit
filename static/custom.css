@@ -1,5 +1,22 @@
+a:link    {
+  /* Applies to all unvisited links */
+  text-decoration:  none;
+  } 
+a:visited {
+  /* Applies to all visited links */
+  text-decoration:  none;
+  } 
+a:hover   {
+  /* Applies to links under the pointer */
+  text-decoration:  underline;
+  } 
+
 div.container {
 	/* since blueprintcss sets the font-size to 75%, we
 	 * increase the size again here */
-	font-size: 120%; 
+	font-size: 120%;
+}
+
+.footer {
+	text-align: center;
 }
