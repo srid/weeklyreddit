@@ -10,7 +10,8 @@ except ImportError:
     from StringIO import StringIO
 
 
-from google.appengine.ext import webapp, db
+import webapp2 as webapp
+from google.appengine.ext import db
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
 from google.appengine.api        import users
@@ -158,7 +159,7 @@ class MainPage(SimpleRequestHandler):
         
 class RSSPage(SimpleRequestHandler):
     
-    def get(self, parent_re_group, subreddit):
+    def get(self, subreddit):
         self.response.headers['Content-Type'] = 'application/rss+xml'
         self.response.out.write(
             reddit_top_links_rss(subreddit or 'reddit.com')
@@ -167,7 +168,8 @@ class RSSPage(SimpleRequestHandler):
 
 application = webapp.WSGIApplication([
     ('/', MainPage),
-    ('/rss(/([a-zA-Z_]+))?', RSSPage)
+    webapp.Route('/rss/<subreddit:\w+>', handler=RSSPage),
+    # ('/rss(/([a-zA-Z_]+))?', RSSPage)
     ],
     debug=True
 )
