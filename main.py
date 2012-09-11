@@ -21,27 +21,17 @@ from PyRSS2Gen   import RSS2, RSSItem, Guid
 
 
 SITE_URL = 'http://weeklyreddit.appspot.com'
+TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 
- 
-class SimpleRequestHandler(webapp.RequestHandler):
-    
-    def __init__(self, *args, **kwargs):
-        super(SimpleRequestHandler, self).__init__(*args, **kwargs)
-        self.view = {}
-    
-    def render_view(self, name):
-        path = os.path.join(os.path.dirname(__file__),
-                            'templates',
-                            name)
-        
-        self.view.update({
-            'is_admin':   users.is_current_user_admin(),
-            'login_url':  users.create_login_url("/"),
-            'logout_url': users.create_logout_url("/"),
-        })
-        
-        self.response.out.write(template.render(path, self.view))
-        
+
+def render_template(path):
+    """Render the given template with basic template vars containing user info"""
+    return webapp.Response(template.render(os.path.join(TEMPLATES_DIR, path), {
+        'is_admin':   users.is_current_user_admin(),
+        'login_url':  users.create_login_url("/"),
+        'logout_url': users.create_logout_url("/"),
+        }))
+
 
 class CurrentWeekEntry(db.Model):
     """Stores current week top links in JSON format.
@@ -154,32 +144,18 @@ def reddit_top_links_rss(subreddit):
     return file_write_to_string(rss.write_xml)
 
  
-class MainPage(SimpleRequestHandler):
-    
-    def get(self):
-        self.render_view("main.html")
-        
-        
-class RSSPage(SimpleRequestHandler):
-    
-    def get(self, subreddit):
-        self.response.headers['Content-Type'] = 'application/rss+xml'
-        self.response.out.write(
-            reddit_top_links_rss(subreddit or 'reddit.com')
-        )
-        
+def main_page(request):
+    return render_template("main.html")
+
+
+def rss_page(request, subreddit):
+    xml = reddit_top_links_rss(subreddit or 'reddit.com')
+    return webapp.Response(xml, content_type='application/rss+xml')
+
 
 application = webapp.WSGIApplication([
-    ('/', MainPage),
-    webapp.Route('/rss/<subreddit:\w+>', handler=RSSPage),
+    webapp.Route('/', handler=main_page),
+    webapp.Route('/rss/<subreddit:\w+>', handler=rss_page),
     ],
-    debug=True
+    debug=True  # this will show a traceback to the user, which is ok for this app
 )
-
-""" Old code:
-def main():
-  run_wsgi_app(application)
-
-if __name__ == "__main__":
-  main()
-"""
