@@ -5,10 +5,8 @@ import datetime
 import logging
 import json
 
-
 import webapp2 as webapp
-from google.appengine.ext import db
-from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.ext        import db
 from google.appengine.ext.webapp import template
 from google.appengine.api        import users
 from google.appengine.api        import urlfetch
@@ -22,7 +20,8 @@ USER_AGENT = 'weeklyreddit from github.com/srid/weeklyreddit; served by %s' % os
 logging.info('running with user agent: %s', USER_AGENT)
 
 
-class RedditAPIError(Exception): pass
+class RedditAPIError(Exception): 
+    pass
 
 
 def request_reddit(url):
@@ -77,7 +76,7 @@ class CurrentWeekEntry(db.Model):
             entry.datetime = now
             entry.put()
         else:
-            logging.info("Reusing top links for '%s'" % subreddit)
+            logging.debug("Reusing top links for '%s'" % subreddit)
             j = json.loads(entry.top_links_json)
         return j
 
@@ -123,14 +122,15 @@ def main_page(request):
     return render_template("main.html")
 
 
-def rss_page(request, subreddit):
-    xml = reddit_top_links_rss(subreddit or 'reddit.com')
+def rss_page(request, subreddit='reddit.com'):
+    xml = reddit_top_links_rss(subreddit)
     return webapp.Response(xml, content_type='application/rss+xml')
 
 
 application = webapp.WSGIApplication([
     webapp.Route('/', handler=main_page),
     webapp.Route('/rss/<subreddit:\w+>', handler=rss_page),
+    webapp.Route('/rss', handler=rss_page),
     ],
     debug=True  # this will show a traceback to the user, which is ok for this app
 )
