@@ -98,8 +98,11 @@ def file_write_to_string(file_writer):
 
 class RedditAPIError(Exception): pass
 
+USER_AGENT = 'weeklyreddit from github.com/srid/weeklyreddit; served by %s' % os.environ['SERVER_SOFTWARE']
+logging.info('running with user agent: %s', USER_AGENT)
+
 def request_reddit(url):
-    result = urlfetch.fetch(url, headers={'User-Agent': 'github.com/srid/weeklyreddit by /u/sridhr'})
+    result = urlfetch.fetch(url, headers={'User-Agent': USER_AGENT})
     if result.status_code != 200:
         raise RedditAPIError('http response [%s] for %s - content: %s' % (result.status_code, url, result.content))
     j = json.loads(result.content)
@@ -169,7 +172,6 @@ class RSSPage(SimpleRequestHandler):
 application = webapp.WSGIApplication([
     ('/', MainPage),
     webapp.Route('/rss/<subreddit:\w+>', handler=RSSPage),
-    # ('/rss(/([a-zA-Z_]+))?', RSSPage)
     ],
     debug=True
 )
