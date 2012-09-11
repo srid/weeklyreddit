@@ -4,6 +4,7 @@ import os
 import datetime
 import urllib
 import logging
+import json
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -16,7 +17,6 @@ from google.appengine.ext.webapp import template
 from google.appengine.api        import users
 
 from PyRSS2Gen   import RSS2, RSSItem, Guid
-import simplejson as json
 
 
 SITE_URL = 'http://weeklyreddit.appspot.com'
@@ -163,8 +163,10 @@ application = webapp.WSGIApplication([
     debug=True
 )
 
+""" Old code:
 def main():
   run_wsgi_app(application)
 
 if __name__ == "__main__":
   main()
+"""
