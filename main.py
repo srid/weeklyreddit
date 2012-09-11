@@ -2,7 +2,6 @@ import import_wrapper
 
 import os
 import datetime
-import urllib
 import logging
 import json
 try:
@@ -15,6 +14,7 @@ from google.appengine.ext import webapp, db
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
 from google.appengine.api        import users
+from google.appengine.api        import urlfetch
 
 from PyRSS2Gen   import RSS2, RSSItem, Guid
 
@@ -94,16 +94,25 @@ def file_write_to_string(file_writer):
         
     return text
 
+
+class RedditAPIError(Exception): pass
+
+def request_reddit(url):
+    result = urlfetch.fetch(url, headers={'User-Agent': 'github.com/srid/weeklyreddit by /u/sridhr'})
+    if result.status_code != 200:
+        raise RedditAPIError('http response [%s] for %s - content: %s' % (result.status_code, url, result.content))
+    j = json.loads(result.content)
+    if 'error' in j:
+        raise RedditAPIError(j['error'])
+    return j
         
 def reddit_top_links(subreddit):
     """ Return top links in a given subreddit. If `subreddit` is None, use the
     main reddit. """
-    
     # reddit provides a JSON api
     # see: http://code.reddit.com/ticket/154
     top_url = "http://www.reddit.com/r/%s/top/.json?t=week" % subreddit
-    
-    j = json.load(urllib.urlopen(top_url))
+    j = request_reddit(top_url)
     return j['data']['children']
     
 def link_description(link_data):
