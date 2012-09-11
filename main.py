@@ -4,10 +4,6 @@ import os
 import datetime
 import logging
 import json
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
 
 
 import webapp2 as webapp
@@ -22,6 +18,21 @@ from PyRSS2Gen   import RSS2, RSSItem, Guid
 
 SITE_URL = 'http://weeklyreddit.appspot.com'
 TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
+USER_AGENT = 'weeklyreddit from github.com/srid/weeklyreddit; served by %s' % os.environ['SERVER_SOFTWARE']
+logging.info('running with user agent: %s', USER_AGENT)
+
+
+class RedditAPIError(Exception): pass
+
+
+def request_reddit(url):
+    result = urlfetch.fetch(url, headers={'User-Agent': USER_AGENT})
+    if result.status_code != 200:
+        raise RedditAPIError('http response [%s] for %s - content: %s' % (result.status_code, url, result.content))
+    j = json.loads(result.content)
+    if 'error' in j:
+        raise RedditAPIError(j['error'])
+    return j
 
 
 def render_template(path):
@@ -69,37 +80,8 @@ class CurrentWeekEntry(db.Model):
             logging.info("Reusing top links for '%s'" % subreddit)
             j = json.loads(entry.top_links_json)
         return j
-        
-
-def file_write_to_string(file_writer):
-    """Call `file_writer' with a file-like object as argument and return
-    the written contents of that file
-    """
-    sio = StringIO()
-    
-    try:
-        file_writer(sio)
-        text = sio.getvalue()
-    finally:
-        sio.close()
-        
-    return text
 
 
-class RedditAPIError(Exception): pass
-
-USER_AGENT = 'weeklyreddit from github.com/srid/weeklyreddit; served by %s' % os.environ['SERVER_SOFTWARE']
-logging.info('running with user agent: %s', USER_AGENT)
-
-def request_reddit(url):
-    result = urlfetch.fetch(url, headers={'User-Agent': USER_AGENT})
-    if result.status_code != 200:
-        raise RedditAPIError('http response [%s] for %s - content: %s' % (result.status_code, url, result.content))
-    j = json.loads(result.content)
-    if 'error' in j:
-        raise RedditAPIError(j['error'])
-    return j
-        
 def reddit_top_links(subreddit):
     """ Return top links in a given subreddit. If `subreddit` is None, use the
     main reddit. """
@@ -108,40 +90,33 @@ def reddit_top_links(subreddit):
     top_url = "http://www.reddit.com/r/%s/top/.json?t=week" % subreddit
     j = request_reddit(top_url)
     return j['data']['children']
-    
-def link_description(link_data):
-    comments_link = "http://reddit.com/r/%s/comments/%s" % (link_data['subreddit'],
-                                                            link_data['id'])
-    return '<a href="%s">Comments Link</a>' % comments_link
+
     
 def reddit_top_links_rss(subreddit):
     rss_items = []
-    
     for link in CurrentWeekEntry.reddit_top_links_for_this_week(subreddit):
         link = link['data']
-        comments_url = 'http://reddit.com/r/%s/comments/%s' % (link['subreddit'],
-                                                               link['id'])
+        comments_url = 'http://reddit.com/r/{subreddit}/comments/{id}'.format(**link)
         rss_items.append(
             RSSItem(
-                title = "%s (%d points; %d comments)" % (link['title'],
-                                                         link['score'],
-                                                         link['num_comments']),
+                title = "%s (%d points; %d comments)" % (
+                    link['title'],
+                    link['score'],
+                    link['num_comments']),
                 link = link['url'],
                 author = link['author'],
-                description = link_description(link),
+                description = '<a href="%s">View comments on reddit</a>' % comments_url,
                 guid = Guid(link['url']),
                 pubDate = datetime.datetime.fromtimestamp(link['created'])
             )
         )
    
-    rss = RSS2(
-        title = '%s - top reddit links' % subreddit,
+    return RSS2(
+        title = 'r/%s - top reddit links' % subreddit,
         link = SITE_URL,
         description = 'read top links in reddit every week',
         items = rss_items
-    )
-    
-    return file_write_to_string(rss.write_xml)
+    ).to_xml()
 
  
 def main_page(request):
